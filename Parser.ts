@@ -1,4 +1,4 @@
-﻿module Parsing {
+module Parsing {
     export class Parser {
         public parse(regx: string): Expression {
             let exp = this.preprocess(regx);
@@ -30,7 +30,13 @@
                     operatorStack.push(char);
                 }
                 else {
-                    operandsStack.push(new CharExpression(char));
+                    if (char == '\\' && exp.charAt(i + 1) == 'e') {
+                        operandsStack.push(new CharExpression(''));
+                        i++;
+                    }
+                    else {
+                        operandsStack.push(new CharExpression(char));
+                    }
                 }
             }
 
@@ -68,8 +74,13 @@
             for (let i = 0; i < regx.length - 1; i++) {
                 let currentChar = regx.charAt(i);
                 let nextChar = regx.charAt(i + 1);
-                if ((currentChar == ')' || currentChar == '*' || (!this.isOperator(currentChar) && currentChar != '(')) &&
-                    (nextChar == '(' || (!this.isOperator(nextChar) && nextChar != ')'))) {
+                if (currentChar == '\\' && nextChar == 'e') {
+                    i++;
+                    concatedExp += (currentChar + nextChar);
+                    continue;
+                }
+                if ((currentChar == ')' || currentChar == '*' || (!this.isOperator(currentChar) && currentChar != '('))
+                    && (nextChar == '(' || (!this.isOperator(nextChar) && nextChar != ')'))) {
                     concatedExp += currentChar + '.';
                 }
                 else {
@@ -123,6 +134,3 @@
         exp: Expression;
     }
 }
-
-
-
